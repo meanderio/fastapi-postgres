@@ -1,6 +1,17 @@
 services:
+  api:
+    build: .
+    container_name: colbyapictr
+    ports:
+      - "9898:9898"
+    networks:
+      colbynet:
+        ipv4_address: 172.20.0.3
+    depends_on:
+      - db
   db:
     image: postgres:18-alpine
+    container_name: colbydbctr
     restart: always
     environment:
       POSTGRES_USER: mndr
@@ -10,5 +21,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      colbynet:
+        ipv4_address: 172.20.0.2
 volumes:
   postgres_data:
+
+networks:
+  colbynet:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1
