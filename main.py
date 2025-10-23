@@ -21,6 +21,7 @@ class UserBase(BaseModel):
 class PurchaseBase(BaseModel):
     location: str
     amount: float
+    name: str
 
 def get_db():
     db = SessionLocal()
@@ -41,9 +42,11 @@ async def create_user(user: UserBase, db:db_dependency):
 
 @app.post("/purchases/")
 async def create_purchase(purchase: PurchaseBase, db: db_dependency):
+    user = db.query(models.Users).filter(models.Users.name == purchase.name).first()
     db_purchase = models.Purchases(
         location=purchase.location,
-        amount=purchase.amount
+        amount=purchase.amount,
+        purchaser_id=user.id
     )
     db.add(db_purchase)
     db.commit()
