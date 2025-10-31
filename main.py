@@ -3,6 +3,8 @@ from fastapi import (
     HTTPException,
     Depends
 )
+from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 from typing import (
     List,
@@ -12,7 +14,13 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 
-app = FastAPI()
+app = FastAPI(
+    version   = "0.1.0",
+    docs_url  = "/docs",
+    redoc_url = "/redoc",
+)
+
+
 models.Base.metadata.create_all(bind=engine)
 
 class UserBase(BaseModel):
