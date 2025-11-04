@@ -11,9 +11,13 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv sync --locked
 
-COPY database.py .
-COPY models.py .
+COPY core/ core/
+COPY db/ db/
+COPY models/ models/
+COPY schemas/ schemas/
+COPY routers/ routers/
 COPY main.py .
+COPY .env .
 
 EXPOSE 9898
 

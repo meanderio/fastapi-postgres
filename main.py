@@ -1,15 +1,11 @@
-from typing import Annotated  # List,
-
 from fastapi import (
-    Depends,
     FastAPI,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
-import models
-from database import SessionLocal, engine
+from core.config import settings
+from db.database import create_tables
+from routers import purchase, user
 
 app = FastAPI(
     version="0.1.0",
@@ -19,48 +15,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-models.Base.metadata.create_all(bind=engine)
+app.include_router(user.router, prefix=settings.API_PREFIX)
+app.include_router(purchase.router, prefix=settings.API_PREFIX)
 
-
-class UserBase(BaseModel):
-    name: str
-
-
-class PurchaseBase(BaseModel):
-    location: str
-    amount: float
-    name: str
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
-
-
-@app.post("/users/")
-async def create_user(user: UserBase, db: db_dependency):
-    db_user = models.Users(name=user.name)
-    db.add(db_user)
-    db.commit()
-
-
-@app.post("/purchases/")
-async def create_purchase(purchase: PurchaseBase, db: db_dependency):
-    user = db.query(models.Users).filter(models.Users.name == purchase.name).first()
-    db_purchase = models.Purchases(
-        location=purchase.location, amount=purchase.amount, purchaser_id=user.id
-    )
-    db.add(db_purchase)
-    db.commit()
+create_tables()
