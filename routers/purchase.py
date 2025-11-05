@@ -34,7 +34,7 @@ async def create_user(
     db.commit()
 
 
-@router.get("/{purachase_id}")
+@router.get("/{purchase_id}")
 def get_user(purchase_id: int, db: Session = Depends(get_db)):
     db_purchase = db.query(Purchases).filter(Purchases.id == purchase_id).first()
     if not db_purchase:
