@@ -19,7 +19,7 @@ def get_session_id(session_id: Optional[str] = Cookie(None)):
 
 
 @router.post("/create")
-async def create_user(
+async def create_purchase(
     purchase: PurchaseBase,
     response: Response,
     session_id: str = Depends(get_session_id),
@@ -35,8 +35,9 @@ async def create_user(
 
 
 @router.get("/{purchase_id}")
-def get_user(purchase_id: int, db: Session = Depends(get_db)):
+def get_purchase(purchase_id: int, db: Session = Depends(get_db)):
     db_purchase = db.query(Purchases).filter(Purchases.id == purchase_id).first()
+    print(db_purchase.purchaser.name, dir(db_purchase.purchaser))
     if not db_purchase:
         raise HTTPException(status_code=404, detail="Purchase not found")
     return db_purchase
