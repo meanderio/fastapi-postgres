@@ -1,38 +1,40 @@
-import uuid
-from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
+# from schemas.user import UserBase
+from sqlmodel import Session
 
-from db.database import get_db
+# from sqlalchemy.orm import Session
+from db.database import get_session
 from models.user import Users
-from schemas.user import UserBase
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-def get_session_id(session_id: Optional[str] = Cookie(None)):
-    if not session_id:
-        session_id = str(uuid.uuid4)
-    return session_id
+# def get_session_id(session_id: Optional[str] = Cookie(None)):
+#    if not session_id:
+#        session_id = str(uuid.uuid4)
+#    return session_id
 
 
-@router.post("/create")
+@router.post("/create", response_model=Users)
 async def create_user(
-    user: UserBase,
-    response: Response,
-    session_id: str = Depends(get_session_id),
-    db: Session = Depends(get_db),
+    user: Users,
+    # response: Response,
+    # session_id: str = Depends(get_session_id),
+    session: Session = Depends(get_session),
 ):
-    response.set_cookie(key="session_id", value=session_id, httponly=True)
-    db_user = Users(name=user.name)
-    db.add(db_user)
-    db.commit()
+    # response.set_cookie(key="session_id", value=session_id, httponly=True)
+    # db_user = Users(name=user.name)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
 
 
-@router.get("/{user_id}")
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(Users).filter(Users.id == user_id).first()
-    if not db_user:
+@router.get("/{user_id}", response_model=Users)
+def get_user(user_id: int, session: Session = Depends(get_session)):
+    # db_user = db.query(Users).filter(Users.id == user_id).first()
+    user = session.get(Users, user_id)
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+    return user
