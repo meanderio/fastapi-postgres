@@ -1,3 +1,4 @@
+from fastapi import Depends
 from sqlmodel import Session, SQLModel, create_engine
 
 from core.config import settings
@@ -11,4 +12,8 @@ def get_session():
 
 
 def create_tables():
+    SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
+
+
+SessionDep = Depends(get_session)
