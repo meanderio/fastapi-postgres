@@ -1,22 +1,29 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+
+from models.user import User
 
 
 class PurchaseBase(SQLModel):
     location: str = Field(index=True)
     amount: float
+    user_id: int | None = Field(default=None, foreign_key="user.id")
 
 
 class Purchase(PurchaseBase, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
-    user_id: int | None = Field(default=None, foreign_key="user.id")
+    purchaser: User | None = Relationship(back_populates="purchases")
 
 
 class PurchasePublic(PurchaseBase):
     id: int
 
 
+class PurchasePublicWithUser(PurchasePublic):
+    purchaser: User | None = None
+
+
 class PurchaseCreate(PurchaseBase):
-    purchaser: str
+    pass
 
 
 class PurchaseUpdate(PurchaseBase):
