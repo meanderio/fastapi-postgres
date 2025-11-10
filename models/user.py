@@ -5,6 +5,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 class UserBase(SQLModel):
     name: str = Field(index=True)
+    age: int | None = Field(default=None)
 
 
 class User(UserBase, table=True):
