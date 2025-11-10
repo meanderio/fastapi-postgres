@@ -1,6 +1,9 @@
+from typing import TYPE_CHECKING
+
 from sqlmodel import Field, Relationship, SQLModel
 
-# from models.purchase import Purchase
+if TYPE_CHECKING:
+    from models.purchase import Purchase
 
 
 class UserBase(SQLModel):
@@ -27,10 +30,3 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     name: str | None = None
-
-
-# class Users(SQLModel, table=True):
-#    id: Optional[int] = Field(primary_key=True, index=True)
-#    name: str
-#    age: Optional[int]
-#    # purchases: List["Purchases"] = Relationship(back_populates="purchaser")

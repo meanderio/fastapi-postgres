@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException
-from sqlmodel import Session
+from fastapi import APIRouter, HTTPException, Query
+from sqlmodel import Session, select
 
 from db.database import SessionDep
 from models.user import User, UserCreate, UserPublic, UserPublicWithPurchases
@@ -24,7 +24,12 @@ def get_user(user_id: int, session: Session = SessionDep):
     return user
 
 
-# @router.get("/", response_model=list[Users])
-# async def get_users(session: Session = SessionDep, offset: int = 0, limit: int = 100):
-#    users = session.exec(select(Users).offset(offset).limit(limit)).all()
-#    return users
+@router.get("/", response_model=list[UserPublic])
+async def get_users(
+    *,
+    session: Session = SessionDep,
+    offset: int = 0,
+    limit: int = Query(default=100, le=100),
+):
+    users = session.exec(select(User).offset(offset).limit(limit)).all()
+    return users

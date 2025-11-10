@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException
-from sqlmodel import Session
+from fastapi import APIRouter, HTTPException, Query
+from sqlmodel import Session, select
 
 from db.database import SessionDep
 from models.purchase import (
@@ -27,3 +27,14 @@ def get_purchase(purchase_id: int, session: Session = SessionDep):
     if not purchase:
         raise HTTPException(status_code=404, detail="Purchase not found")
     return purchase
+
+
+@router.get("/", response_model=list[PurchasePublic])
+async def get_purchases(
+    *,
+    session: Session = SessionDep,
+    offset: int = 0,
+    limit: int = Query(default=100, le=100),
+):
+    purchases = session.exec(select(Purchase).offset(offset).limit(limit)).all()
+    return purchases
